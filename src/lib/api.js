@@ -1,7 +1,7 @@
-// base URL
-import axios from "axios";
-import {Cookie} from "lucide-react";
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
+// base URL
 const API_BASE_URL = import.meta.env.VITE_API_FILE_URL || 'http://localhost:8000/flower-arrangements/api/v1.0';
 
 const api = axios.create({
@@ -13,7 +13,7 @@ const api = axios.create({
 
 // add access token
 api.interceptors.request.use((config) => {
-    const accessToken = Cookie.get('accessToken');
+    const accessToken = Cookies.get('accessToken');
     if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -27,7 +27,12 @@ export const authAPIs = {
     userRegister: async (userData) => {
         const response = await api.post('/user/register', userData);
         return response.data;
-    }
+    },
+
+    userLogin: async (userData) => {
+        const response = await api.post('/user/login', userData);
+        return response.data;
+    },
 }
 
 export const fileToBase64 = async (file) => {

@@ -1,0 +1,56 @@
+button.register-btn {
+    position: relative;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #ffffff !important;
+    border: none;
+    cursor: pointer;
+    background-color: #3b96ff !important;
+    background-image: none !important;
+    transition: background-color 1.8s ease;
+    margin-top: 1.5rem;
+    overflow: hidden;
+}
+
+button.register-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -150%;
+    width: 150%;
+    height: 100%;
+    background: linear-gradient(135deg, transparent 0%, transparent 35%, rgba(255, 255, 255, 0.6) 50%, transparent 65%, transparent 100%);
+    transition: right 1.8s ease;
+    z-index: 1;
+}
+
+button.register-btn.hovered {
+    background-color: #00ff2a !important;
+}
+
+button.register-btn.hovered::before {
+    right: 100%;
+}
+
+button.register-btn span {
+    position: relative;
+    z-index: 2;
+}
+
+button.register-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+button.register-btn:disabled::before {
+    display: none;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
