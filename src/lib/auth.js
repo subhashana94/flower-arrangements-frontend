@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 
 // save authentication token and user data
-export const saveAuth = (data, role) => {
+export const handleAuth = (data, role) => {
     // Backend returns: accessToken, refreshToken, administrator/user
     const {accessToken, refreshToken, administrator, user} = data;
 
