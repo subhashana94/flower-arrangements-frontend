@@ -1,8 +1,8 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-// base URL
-const API_BASE_URL = import.meta.env.VITE_API_FILE_URL || 'http://localhost:8000/flower-arrangements/api/v1.0';
+// base URL - Fixed to use correct env variable
+const API_BASE_URL = import.meta.env.VITE_API_FULL_URL || 'http://localhost:8000/flower-arrangements/api/v1.0';
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -13,7 +13,7 @@ const api = axios.create({
 
 // add access token
 api.interceptors.request.use((config) => {
-    const accessToken = Cookies.get('accessToken');
+    const accessToken = Cookies.get('accessToken'); // Fixed: use accessToken
     if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
     }

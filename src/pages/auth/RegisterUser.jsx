@@ -1,11 +1,12 @@
 import React from 'react';
 import './RegisterUser.css';
-import {authAPIs, fileToBase64} from "../../lib/api.js";
+import {authAPIs} from "../../lib/api.js";
 import {saveAuth} from "../../lib/auth.js";
 import {useNavigate, Link} from "react-router-dom";
+import ImageCropperModal from "../../components/ImageCropperModal.jsx";
+import useImageCropper from "../../lib/useImageCropper.js";
 
 const RegisterUser = () => {
-
     const navigate = useNavigate();
 
     const [formData, setFormData] = React.useState({
@@ -14,12 +15,18 @@ const RegisterUser = () => {
         email_address: "",
         password: "",
         confirm_password: "",
-        user_image: null
     });
     const [error, setErrors] = React.useState('');
-    const [imagePreview, setImagePreview] = React.useState('');
     const [loading, setLoading] = React.useState(false);
     const [isHovered, setIsHovered] = React.useState(false);
+
+    const imageCropper = useImageCropper({
+        aspectRatio: 1,
+        outputWidth: 400,
+        outputHeight: 400,
+        cropShape: 'round',
+        maxSizeMB: 1
+    });
 
     const handleChange = (e) => {
         setFormData({
@@ -27,28 +34,7 @@ const RegisterUser = () => {
             [e.target.name]: e.target.value
         });
         setErrors('');
-    }
-
-    const handleImageChange = async (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            if (!['image/jpeg', 'image/png', "image/jpeg"].includes(file.type)) {
-                setErrors('Only PNG, JPG and JPEG file types are allowed');
-            }
-
-            if (file.size > 5 * 1024 * 1024) {
-                setErrors('Image size must me less than 5MB');
-            }
-
-            try {
-                const base64 = await fileToBase64(file);
-                setFormData({...formData, user_image: base64});
-                setImagePreview(base64);
-            } catch (error) {
-                setErrors('Failed to process image : ' + error.message);
-            }
-        }
-    }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -69,6 +55,12 @@ const RegisterUser = () => {
 
         try {
             const {confirm_password, ...registerData} = formData;
+
+            // Add cropped image if available
+            if (imageCropper.croppedImage) {
+                registerData.user_image = imageCropper.croppedImage;
+            }
+
             await authAPIs.userRegister(registerData);
 
             const loginResponse = await authAPIs.userLogin({
@@ -85,7 +77,7 @@ const RegisterUser = () => {
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     return (
         <div>
@@ -106,11 +98,16 @@ const RegisterUser = () => {
                         )}
 
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Image Upload with Cropper */}
                             <div className="flex flex-col items-center mb-4">
                                 <div
                                     className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-3 overflow-hidden">
-                                    {imagePreview ? (
-                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover"/>
+                                    {imageCropper.croppedImage ? (
+                                        <img
+                                            src={imageCropper.croppedImage}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover"
+                                        />
                                     ) : (
                                         <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24"
                                              stroke="currentColor">
@@ -119,16 +116,30 @@ const RegisterUser = () => {
                                         </svg>
                                     )}
                                 </div>
-                                <label
-                                    className="cursor-pointer bg-purple-50 text-purple-600 px-4 py-2 rounded-lg hover:bg-purple-100 transition text-sm font-medium">
-                                    Upload Photo (Optional)
-                                    <input
-                                        type="file"
-                                        accept="image/png,image/jpeg,image/jpg"
-                                        onChange={handleImageChange}
-                                        className="hidden"
-                                    />
-                                </label>
+
+                                <div className="flex gap-2">
+                                    <label
+                                        className="cursor-pointer bg-purple-50 text-purple-600 px-4 py-2 rounded-lg hover:bg-purple-100 transition text-sm font-medium">
+                                        {imageCropper.croppedImage ? 'Change Photo' : 'Upload Photo'}
+                                        <input
+                                            type="file"
+                                            accept="image/png,image/jpeg,image/jpg"
+                                            onChange={imageCropper.handleFileSelect}
+                                            className="hidden"
+                                        />
+                                    </label>
+
+                                    {imageCropper.croppedImage && (
+                                        <button
+                                            type="button"
+                                            onClick={imageCropper.clearCroppedImage}
+                                            className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition text-sm font-medium"
+                                        >
+                                            Remove
+                                        </button>
+                                    )}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-2">Optional - Max 1MB</p>
                             </div>
 
                             <div>
@@ -220,19 +231,26 @@ const RegisterUser = () => {
                                 onMouseEnter={() => !loading && setIsHovered(true)}
                                 onMouseLeave={() => !loading && setIsHovered(false)}
                             >
-    <span style={{position: 'relative', zIndex: 10}}>
-        {loading ? (
-            <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                <svg style={{animation: 'spin 1s linear infinite', height: '1.25rem', width: '1.25rem', marginRight: '0.5rem'}} viewBox="0 0 24 24">
-                    <circle style={{opacity: 0.25}} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path style={{opacity: 0.75}} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                Creating Account...
-            </span>
-        ) : (
-            'Create Account'
-        )}
-    </span>
+                                <span style={{position: 'relative', zIndex: 10}}>
+                                    {loading ? (
+                                        <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                                            <svg style={{
+                                                animation: 'spin 1s linear infinite',
+                                                height: '1.25rem',
+                                                width: '1.25rem',
+                                                marginRight: '0.5rem'
+                                            }} viewBox="0 0 24 24">
+                                                <circle style={{opacity: 0.25}} cx="12" cy="12" r="10"
+                                                        stroke="currentColor" strokeWidth="4" fill="none"/>
+                                                <path style={{opacity: 0.75}} fill="currentColor"
+                                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                                            </svg>
+                                            Creating Account...
+                                        </span>
+                                    ) : (
+                                        'Create Account'
+                                    )}
+                                </span>
                             </button>
                         </form>
 
@@ -247,6 +265,17 @@ const RegisterUser = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Image Cropper Modal */}
+            {imageCropper.showCropper && (
+                <ImageCropperModal
+                    image={imageCropper.originalImage}
+                    onCropComplete={imageCropper.handleCropComplete}
+                    onCancel={imageCropper.handleCropCancel}
+                    title="Crop Profile Photo"
+                    {...imageCropper.cropperConfig}
+                />
+            )}
         </div>
     );
 };

@@ -2,11 +2,12 @@ import Cookies from 'js-cookie';
 
 // save authentication token and user data
 export const saveAuth = (data, role) => {
-    const {access_token, refresh_token, administrator, user} = data;
+    // Backend returns: accessToken, refreshToken, administrator/user
+    const {accessToken, refreshToken, administrator, user} = data;
 
-    // Save Tokens
-    Cookies.set("access_token", access_token, {expires: 1/96}); // 15 minutes
-    Cookies.set("refresh_token", refresh_token, {expires: 7}); // 7 days
+    // Save Tokens with correct names
+    Cookies.set("accessToken", accessToken, {expires: 1/96}); // 15 minutes
+    Cookies.set("refreshToken", refreshToken, {expires: 7}); // 7 days
     Cookies.set('userRole', role);
 
     // save user data
@@ -24,15 +25,15 @@ export const getCurrentUser = () => {
 
 // check user if authenticated?
 export const isAuthenticated = () => {
-    const access_token = Cookies.get("access_token");
-    const refresh_token = Cookies.get("refresh_token");
-    return !!(access_token || refresh_token);
+    const accessToken = Cookies.get("accessToken");
+    const refreshToken = Cookies.get("refreshToken");
+    return !!(accessToken || refreshToken);
 }
 
 // logout user
 export const logout = () => {
-    Cookies.remove("access_token");
-    Cookies.remove("refresh_token");
+    Cookies.remove("accessToken");
+    Cookies.remove("refreshToken");
     Cookies.remove("userRole");
     Cookies.remove("userData");
 
@@ -40,4 +41,3 @@ export const logout = () => {
         window.location.href = "/login";
     }
 }
-
