@@ -24,6 +24,8 @@ api.interceptors.request.use((config) => {
 
 // auth APIs
 export const authAPIs = {
+
+    // user endpoints
     userRegister: async (userData) => {
         const response = await api.post('/user/register', userData);
         return response.data;
@@ -31,6 +33,17 @@ export const authAPIs = {
 
     userLogin: async (userData) => {
         const response = await api.post('/user/login', userData);
+        return response.data;
+    },
+
+    // admin endpoints
+    adminRegister: async (userData) => {
+        const response = await api.post('/admin/register', userData);
+        return response.data;
+    },
+
+    adminLogin: async (userData) => {
+        const response = await api.post('/admin/login', userData);
         return response.data;
     },
 }

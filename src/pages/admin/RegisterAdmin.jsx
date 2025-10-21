@@ -1,12 +1,12 @@
 import React from 'react';
-import './User.css';
+import './Admin.css';
 import {authAPIs} from "../../lib/api.js";
 import {handleAuth} from "../../lib/auth.js";
 import {useNavigate, Link} from "react-router-dom";
 import ImageCropperModal from "../../components/ImageCropperModal.jsx";
 import useImageCropper from "../../lib/useImageCropper.js";
 
-const RegisterUser = () => {
+const RegisterAdmin = () => {
     const navigate = useNavigate();
 
     const [formData, setFormData] = React.useState({
@@ -56,23 +56,23 @@ const RegisterUser = () => {
         try {
             const {confirm_password, ...registerData} = formData;
 
-            // Add cropped image if available
             if (imageCropper.croppedImage) {
                 registerData.user_image = imageCropper.croppedImage;
             }
 
-            await authAPIs.userRegister(registerData);
+            await authAPIs.adminRegister(registerData);
 
-            const loginResponse = await authAPIs.userLogin({
+            const loginResponse = await authAPIs.adminLogin({
                 email_address: formData.email_address,
                 password: formData.password,
             });
 
-            handleAuth(loginResponse, 'user');
-            navigate('/events');
+            handleAuth(loginResponse, 'admin');
+            navigate('/admin/dashboard');
+
         } catch (error) {
             setErrors(
-                error.response?.data?.message || 'Registration fail. Please try again later.'
+                error.response?.data?.message || 'Registration failed. Please try again later.'
             );
         } finally {
             setLoading(false);
@@ -85,9 +85,9 @@ const RegisterUser = () => {
                 className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-indigo-100 p-4 py-12">
                 <div className="max-w-md w-full">
                     <div className="text-center mb-8">
-                        <div className="text-5xl mb-4">🌸</div>
-                        <h1 className="text-3xl font-bold text-gray-800">Create Account</h1>
-                        <p className="text-gray-600 mt-2">Join our flower arrangement community</p>
+                        <div className="text-5xl mb-4">👨‍💼</div>
+                        <h1 className="text-3xl font-bold text-gray-800">Create Administrator Account</h1>
+                        <p className="text-gray-600 mt-2">Join our flower arrangement management team</p>
                     </div>
 
                     <div className="bg-white rounded-2xl shadow-xl p-8">
@@ -248,7 +248,7 @@ const RegisterUser = () => {
                                             Creating Account...
                                         </span>
                                     ) : (
-                                        'Create Account'
+                                        'Create Administrator Account'
                                     )}
                                 </span>
                             </button>
@@ -257,7 +257,7 @@ const RegisterUser = () => {
                         <div className="mt-6 text-center">
                             <p className="text-sm text-gray-600">
                                 Already have an account?{' '}
-                                <Link to="/login" className="text-purple-600 hover:text-purple-700 font-medium">
+                                <Link to="/admin/login" className="text-purple-600 hover:text-purple-700 font-medium">
                                     Login here
                                 </Link>
                             </p>
@@ -280,4 +280,4 @@ const RegisterUser = () => {
     );
 };
 
-export default RegisterUser;
+export default RegisterAdmin;
